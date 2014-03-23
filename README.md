@@ -1,5 +1,35 @@
 mongo-spark
 ===========
+This is forked off of original work by plaa/mongo-spark
+The changes here relates to supporting use of direct .bson file as input to spark, this
+was needed to conform to RDD requirement of an InputFormat as FileInputFormat<K,V> 
+
+Why BSON, as BSON format is quite compressed compared to CSV and other formats.
+
+The default BSONFileInputFormat in mongo-hadoop connector implements FileInputStream.
+BSONFileInputFormatGeneric adapts it for spark.
+
+Note, I have only tested Scala runtime with this change.
+
+ScalaWordCountBSON.scala example:
+
+
+To Run BSON version run ScalaWordCountBSON.scala
+Use following steps to use BSON format
+
+mongoimport -d beowulf -c input beowulf.json
+#backup input to bson
+mongodump -d beowulf -c input -o beowulf
+#run BSON version
+   sbt 'run-main ScalaWordCountBSON'
+#restore output bson to mongo collectiont testoutput
+   mongorestore -d beowulf -c testoutput ./beowulf/testoutput.bson/part-r-00000.bson 
+#assert
+   mongo beowulf --eval 'printjson(db.testoutput.find().toArray())'
+
+
+
+
 
 Example application on how to use [mongo-hadoop][1] connector with [Apache Spark][2].
 
